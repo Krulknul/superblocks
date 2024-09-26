@@ -87,14 +87,7 @@ function createOciswapSwapIntegration(): Integration {
         console.log("body", body)
         for (const swap of body.swaps) {
             let bucket = generateRandomNumberString(5)
-            // if (swap.input_take == "all") {
-            //     manifest += `
-            //     TAKE_ALL_FROM_WORKTOP
-            //         Address("${swap.input_address}")
-            //         Bucket("${bucket}")
-            //     ;
-            //     `
-            // } else {
+
             manifest += `
                 TAKE_FROM_WORKTOP
                     Address("${swap.input_address}")
@@ -102,7 +95,7 @@ function createOciswapSwapIntegration(): Integration {
                     Bucket("${bucket}")
                 ;
                 `
-            // }
+
             manifest += `
             CALL_METHOD
                 Address("${swap.pool_address}")
