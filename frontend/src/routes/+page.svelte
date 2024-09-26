@@ -20,6 +20,13 @@
         DataRequestBuilder,
     } from "@radixdlt/radix-dapp-toolkit";
     let debug = false;
+    const lock_fee = `
+                         CALL_METHOD
+                            Address("account_rdx12yspdmpd6jdgcffkk6vjkqa9fagf3wnha5xd06s3uje5wr9664arkf")
+                            "deposit_batch"
+                            Expression("ENTIRE_WORKTOP")
+                            ;
+                        `;
 
     const rdt = RadixDappToolkit({
         gatewayBaseUrl: "https://mainnet.radixdlt.com",
@@ -69,15 +76,7 @@ CALL_METHOD
                     manifest += result;
                     console.log(manifest);
                     try {
-                        const localManifest =
-                            manifest +
-                            `
-                        CALL_METHOD
-                            Address("account_rdx12yspdmpd6jdgcffkk6vjkqa9fagf3wnha5xd06s3uje5wr9664arkf")
-                            "deposit_batch"
-                            Expression("ENTIRE_WORKTOP")
-                            ;
-                            `;
+                        const localManifest = manifest + lock_fee;
                         const previewResult =
                             await rdt.gatewayApi.transaction.innerClient.transactionPreview(
                                 {
@@ -130,29 +129,29 @@ CALL_METHOD
 
 <div class="flex-col flex w-[100vw] h-[100vh]">
     <div
-        class="w-full h-14 flex flex-row justify-between items-center text-black p-5"
+        class="w-full h-[10%] flex flex-row justify-between items-center text-black p-5"
     >
-        <h1>Superilla</h1>
+        <h1>Superblocks</h1>
 
         <radix-connect-button></radix-connect-button>
     </div>
-    <div class="flex-col flex h-full bg-blue-50">
+    <div class="flex-col flex h-[90%] bg-blue-50">
         <h1 class="m-5">
-            Superilla allows you to easily compose existing dapps and actions on
-            Radix together into one "all-or-nothing" (atomic) transaction, using
-            the power of Transaction Manifest.
+            Superblocks allows you to easily compose existing dapps and actions
+            on Radix together into one "all-or-nothing" (atomic) transaction,
+            using the power of Transaction Manifest.
             <br />
             Drag "blocks" from the block list on the right, and compose them on the
             left side of the screen to build your transaction.
         </h1>
         {#if isConnected.bool}
-            <div class=" h-full flex items-center justify-center flex-row">
+            <div class=" h-[80%] flex items-center justify-center flex-row">
                 <div
-                    class="w-[50%] h-[95%] bg-gray-300 rounded-lg flex flex-col items-center justify-cente m-6"
+                    class="w-[50%] h-full bg-gray-300 rounded-lg flex flex-col m-6 overflow-scroll"
                 >
                     <InstructionList></InstructionList>
                 </div>
-                <div class="w-[50%] h-[95%] bg-blue-400 rounded-lg m-6">
+                <div class="w-[50%] h-full bg-blue-400 rounded-lg m-6">
                     <Dragula items={blocks}></Dragula>
                     {#await manifest.string}
                         <button
@@ -163,8 +162,15 @@ CALL_METHOD
                         <button
                             class="p-4 m-4 bg-purple-400 rounded-lg"
                             onclick={() => {
+                                const manifestMinusFee = manifest
+                                    .split(";")
+                                    .filter(
+                                        (line) => !line.includes("lock_fee"),
+                                    )
+                                    .join(";");
+                                console.log(manifestMinusFee);
                                 rdt.walletApi.sendTransaction({
-                                    transactionManifest: manifest,
+                                    transactionManifest: manifestMinusFee,
                                     message: "Superblocks transaction",
                                 });
                             }}>Submit</button

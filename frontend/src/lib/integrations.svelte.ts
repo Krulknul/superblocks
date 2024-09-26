@@ -133,12 +133,15 @@ function createDepositIntegration(): Integration {
         account_address: {
             name: "Account Address",
             type: OptionType.ResourceAddress,
-            value: ""
+            value: "",
+            resolver: async (accounts, worktop, inputs) => {
+                return accounts.map(account => { return { value: account.address, label: account.label } })
+            }
         },
         resource_address: {
             name: "Resource Address",
             type: OptionType.ResourceAddress,
-            value: ""
+            value: "",
         },
         amount: {
             name: "Amount",
@@ -148,12 +151,17 @@ function createDepositIntegration(): Integration {
     } as Inputs)
 
     async function evaluate() {
+        const bucket = generateRandomNumberString(5)
         return `
+        TAKE_FROM_WORKTOP
+            Address("${inputs.resource_address.value}")
+            Decimal("${inputs.amount.value}")
+            Bucket("${bucket}")
+        ;
         CALL_METHOD
             Address("${inputs.account_address.value}")
             "deposit"
-            Address("${inputs.resource_address.value}")
-            Decimal("${inputs.amount.value}")
+            Bucket("${bucket}")
         ;`
     }
 
@@ -163,6 +171,39 @@ function createDepositIntegration(): Integration {
         get inputs() { return inputs },
         evaluate,
         instantiate: createDepositIntegration
+    };
+}
+
+function createDepositAllIntegration(): Integration {
+    let id = 2;
+
+    let inputs = $state({
+        account_address: {
+            name: "Account Address",
+            type: OptionType.ResourceAddress,
+            value: "",
+            resolver: async (accounts, worktop, inputs) => {
+                return accounts.map(account => { return { value: account.address, label: account.label } })
+            }
+        },
+    } as Inputs)
+
+    async function evaluate() {
+        const bucket = generateRandomNumberString(5)
+        return `
+        CALL_METHOD
+            Address("${inputs.account_address.value}")
+            "deposit_batch"
+            Expression("ENTIRE_WORKTOP")
+        ;`
+    }
+
+    return {
+        id,
+        name: "Deposit All",
+        get inputs() { return inputs },
+        evaluate,
+        instantiate: createDepositAllIntegration
     };
 }
 
@@ -222,7 +263,8 @@ function createWithdrawalIntegration(): Integration {
 
 
 export const integrations: Integration[] = [
+    createWithdrawalIntegration(),
     createOciswapSwapIntegration(),
     createDepositIntegration(),
-    createWithdrawalIntegration()
+    createDepositAllIntegration(),
 ]
