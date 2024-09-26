@@ -1,0 +1,13 @@
+{
+    "name": "Node",
+    "dockerFile": "Dockerfile",
+    "customizations": {
+        "vscode": {
+            "settings": {},
+            "extensions": [
+                "svelte.svelte-vscode",
+                "bradlc.vscode-tailwindcss"
+            ]
+        }
+    }
+}
