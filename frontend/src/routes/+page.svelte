@@ -20,7 +20,7 @@
         DataRequestBuilder,
     } from "@radixdlt/radix-dapp-toolkit";
     let debug = false;
-    const lock_fee = `
+    const deposit_batch = `
                          CALL_METHOD
                             Address("${accounts.accounts[0].address}")
                             "deposit_batch"
@@ -76,7 +76,7 @@ CALL_METHOD
                     manifest += result;
                     console.log(manifest);
                     try {
-                        const localManifest = manifest + lock_fee;
+                        const localManifest = manifest + deposit_batch;
                         const previewResult =
                             await rdt.gatewayApi.transaction.innerClient.transactionPreview(
                                 {
