@@ -22,7 +22,7 @@
     let debug = false;
     const lock_fee = `
                          CALL_METHOD
-                            Address("account_rdx12yspdmpd6jdgcffkk6vjkqa9fagf3wnha5xd06s3uje5wr9664arkf")
+                            Address("${accounts.accounts[0].address}")
                             "deposit_batch"
                             Expression("ENTIRE_WORKTOP")
                             ;
