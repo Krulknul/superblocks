@@ -174,3 +174,40 @@ export async function getBalancesForAccount(gatewayApi: GatewayApiClient, addres
         fungibles: fungibleResults.filter((item) => item.amount != "0") as FungibleResourceBalance[]
     }
 }
+
+export async function getTokensMetadata(gatewayApi: GatewayApiClient, addresses: string[]): Promise<{ [address: string]: { name: string, symbol: string | null, icon: string | null } }> {
+    const tokenInfoItems = await gatewayApi.state.getEntityDetailsVaultAggregated(addresses);
+
+    const tokenInfoItemsFiltered = tokenInfoItems.filter((item) => item.details?.type == "FungibleResource" || item.details?.type == "NonFungibleResource");
+
+    const tokenInfoItemsMapped = tokenInfoItemsFiltered.map((item) => {
+        const tokenName: string = (item?.metadata.items.find(item => item.key == "name")?.value.programmatic_json as any).fields[0].value;
+        let tokenSymbol;
+        if (item?.metadata.items.find(item => item.key == "symbol")?.value.programmatic_json) {
+            tokenSymbol = (item?.metadata.items.find(item => item.key == "symbol")?.value.programmatic_json as any).fields[0].value;
+        } else {
+            tokenSymbol = null;
+        }
+
+        let icon;
+        if (item?.metadata.items.find(item => item.key == "icon_url")?.value.programmatic_json) {
+            icon = (item?.metadata.items.find(item => item.key == "icon_url")?.value.programmatic_json as any).fields[0].value;
+        } else {
+            icon = null;
+        }
+
+        return {
+            [item.address]: {
+                name: tokenName,
+                symbol: tokenSymbol,
+                icon
+            }
+        }
+    })
+
+    return Object.assign({}, ...tokenInfoItemsMapped)
+}
+
+export function formatTokenAmount(amount: string, digits?: number): string {
+    return Intl.NumberFormat('en-US', { maximumSignificantDigits: digits || 5 }).format(Number(amount));
+}
